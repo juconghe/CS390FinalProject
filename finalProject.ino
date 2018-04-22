@@ -25,7 +25,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   matrix.fillScreen(0);
   matrix.setCursor(0, 1);
   char s[length + 1];
-  Serial.println(length);
   for (int i = 0; i < length; i++) {
     s[i] = (char)payload[i];
   }
