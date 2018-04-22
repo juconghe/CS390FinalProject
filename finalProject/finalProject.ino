@@ -3,6 +3,7 @@
 #include <PubSubClient.h>
 #include <Adafruit_GFX.h>   // Core graphics library
 #include <RGBmatrixPanel.h> // Hardware-specific library
+#include "WiFiEspUdp.h"
 #include <TimeLib.h>
 
 #define ADAFRUIT_USERNAME  "Jucong"
@@ -20,7 +21,17 @@
 const char* ssid = "AHHA Lab Wifi";
 const char* password =  "ramanujan";
 int status = WL_IDLE_STATUS; // the Wifi radio's status
+WiFiEspUDP Udp;
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
+IPAddress timeServer(132,163,97,3);
+const int timeZone = -4;  // Eastern Daylight Time (USA)
+unsigned int localPort = 8888;  // local port to listen for UDP packets
+
+
+
+
+time_t getNtpTime();
+void sendNTPpacket(IPAddress &address);
 
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -110,52 +121,43 @@ void drawSun(){
 
 void drawClock() {
   matrix.swapBuffers(false);
-  int chour = hour();
-  int cminute = minute();
-  int csecond = second();
   matrix.fillScreen(matrix.Color333(0, 0, 0));
   matrix.setCursor(13, 2);   // start at top left, with one pixel of spacing
   matrix.setTextColor(matrix.Color333(0,7,0));
-  Serial.println(chour);
-  if (chour == 12) {
+  Serial.println(hour());
+  if (hour() == 12) {
     matrix.print("12");
     pm();
-  } else if (chour == 0) {
+  } else if (hour() == 0) {
     matrix.print("12");
     am();
-  } else if (chour < 12) {
+  } else if (hour() < 12) {
     matrix.setCursor(15, 2);
     am();
-    matrix.print(chour);
+    matrix.print(hour());
   } else {
     matrix.setCursor(13, 2);
-    matrix.print(chour % 12);
+    matrix.print(hour() % 12);
     pm();
   }
     matrix.print(":");
-    if (cminute <10) {
+    if (minute() <10) {
     matrix.print("0");
-    matrix.print(cminute);
+    matrix.print(minute());
         } else {
-    matrix.print(cminute);
+    matrix.print(minute());
     }
     matrix.print(":");
-    if (csecond <10) {
+    if (second() <10) {
     matrix.print("0");
-    matrix.print(csecond);
+    matrix.print(second());
         } else {
-    matrix.print(csecond);
+    matrix.print(second());
     }
 }
 
 void setup() {
 
-  configTime(-4 * 3600, 0, "pool.ntp.org.", "time,nist.gov");
-  Serial.println("Waiting for time");
-  while (!time(&nullptr)) {
-    Serial.print(".");
-    delay(1000):
-  }
   Serial.begin(115200);
  // initialize serial for ESP module
   Serial2.begin(9600);
@@ -172,6 +174,11 @@ void setup() {
     status = WiFi.begin(ssid, password);
   }
   Serial.println("Connected to the WiFi network");
+  
+  Udp.begin(localPort);
+  Serial.println("waiting for sync");
+  setSyncProvider(getNtpTime);
+  
   matrix.begin();
   matrix.setTextWrap(false); // Allow text to run off right edge
   matrix.setTextSize(1);
@@ -188,4 +195,57 @@ void loop() {
   delay(100);
   client.loop();
 
+}
+
+
+/*-------- NTP code ----------*/
+
+const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
+byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
+
+time_t getNtpTime()
+{
+  while (Udp.parsePacket() > 0) ; // discard any previously received packets
+  Serial.println("Transmit NTP Request");
+  sendNTPpacket(timeServer);
+  uint32_t beginWait = millis();
+  while (millis() - beginWait < 1500) {
+    int size = Udp.parsePacket();
+    if (size >= NTP_PACKET_SIZE) {
+      Serial.println("Receive NTP Response");
+      Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
+      unsigned long secsSince1900;
+      // convert four bytes starting at location 40 to a long integer
+      secsSince1900 =  (unsigned long)packetBuffer[40] << 24;
+      secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
+      secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
+      secsSince1900 |= (unsigned long)packetBuffer[43];
+      return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
+    }
+  }
+  Serial.println("No NTP Response :-(");
+  return 0; // return 0 if unable to get the time
+}
+
+// send an NTP request to the time server at the given address
+void sendNTPpacket(IPAddress &address)
+{
+  // set all bytes in the buffer to 0
+  memset(packetBuffer, 0, NTP_PACKET_SIZE);
+  // Initialize values needed to form NTP request
+  // (see URL above for details on the packets)
+  packetBuffer[0] = 0b11100011;   // LI, Version, Mode
+  packetBuffer[1] = 0;     // Stratum, or type of clock
+  packetBuffer[2] = 6;     // Polling Interval
+  packetBuffer[3] = 0xEC;  // Peer Clock Precision
+  // 8 bytes of zero for Root Delay & Root Dispersion
+  packetBuffer[12]  = 49;
+  packetBuffer[13]  = 0x4E;
+  packetBuffer[14]  = 49;
+  packetBuffer[15]  = 52;
+  // all NTP fields have been given values, now
+  // you can send a packet requesting a timestamp:                 
+  Udp.beginPacket(address, 123); //NTP requests are to port 123
+  Udp.write(packetBuffer, NTP_PACKET_SIZE);
+  Udp.endPacket();
 }
