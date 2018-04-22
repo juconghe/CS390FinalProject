@@ -24,7 +24,7 @@ int status = WL_IDLE_STATUS; // the Wifi radio's status
 WiFiEspUDP Udp;
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
 IPAddress timeServer(132, 163, 97, 3);
-const int timeZone = 2;  // Eastern Daylight Time (USA)
+const int timeZone = -4;  // Eastern Daylight Time (USA)
 unsigned int localPort = 8888;  // local port to listen for UDP packets
 bool on = true;
 
@@ -151,8 +151,8 @@ void drawClock() {
        matrix.drawPixel(11, 3, matrix.Color333(9, 9, 9));
        matrix.drawPixel(11, 6, matrix.Color333(9, 9, 9));
     } else {
-       matrix.drawPixel(6, 3, matrix.Color333(9, 9, 9));
-       matrix.drawPixel(6, 6, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(5, 3, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(5, 6, matrix.Color333(9, 9, 9));
     } 
   }
   on = !on;
