@@ -23,12 +23,10 @@ const char* password =  "ramanujan";
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 WiFiEspUDP Udp;
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
-IPAddress timeServer(132,163,97,3);
-const int timeZone = -4;  // Eastern Daylight Time (USA)
+IPAddress timeServer(132, 163, 97, 3);
+const int timeZone = 2;  // Eastern Daylight Time (USA)
 unsigned int localPort = 8888;  // local port to listen for UDP packets
-
-
-
+bool on = true;
 
 time_t getNtpTime();
 void sendNTPpacket(IPAddress &address);
@@ -48,124 +46,128 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 WiFiEspClient espClient;
 PubSubClient client("io.adafruit.com", 1883, callback, espClient);
- 
+
 void reconnect() {
   while (!client.connected()) {
     Serial.println("Connecting to MQTT...");
- 
+
     if (client.connect("MEGA", ADAFRUIT_USERNAME, AIO_KEY )) {
- 
-      Serial.println("connected and Subscribing");  
+
+      Serial.println("connected and Subscribing");
       client.subscribe(SLIDER_PATH, 1);
       client.publish(PUB_FEED_PATH, "Connect");
-      
+
     } else {
       Serial.print("failed with state ");
       Serial.print(client.state());
       delay(2000);
- 
+
     }
   }
 }
 
 void pm() {
-      //M
-      matrix.drawPixel(7, 5, matrix.Color333(7,0,7));
-      matrix.drawPixel(7, 6, matrix.Color333(7,0,7));
-      matrix.drawPixel(7, 7, matrix.Color333(7,0,7));
-      matrix.drawPixel(7, 8, matrix.Color333(7,0,7));
-      matrix.drawPixel(10, 5, matrix.Color333(7,0,7));
-      matrix.drawPixel(10, 6, matrix.Color333(7,0,7));
-      matrix.drawPixel(10, 7, matrix.Color333(7,0,7));   
-      matrix.drawPixel(10, 8, matrix.Color333(7,0,7)); 
-      matrix.drawPixel(8, 6, matrix.Color333(7,0,7));  
-      matrix.drawPixel(9, 6, matrix.Color333(7,0,7));  
-      //P
-      matrix.drawPixel(5, 5, matrix.Color333(7,0,7));
-      matrix.drawPixel(4, 5, matrix.Color333(7,0,7));
-      matrix.drawPixel(3, 5, matrix.Color333(7,0,7));
-      matrix.drawPixel(2, 5, matrix.Color333(7,0,7));
-      matrix.drawPixel(2, 6, matrix.Color333(7,0,7));
-      matrix.drawPixel(2, 7, matrix.Color333(7,0,7));   
-      matrix.drawPixel(2, 8, matrix.Color333(7,0,7)); 
-      matrix.drawPixel(5, 6, matrix.Color333(7,0,7));  
-      matrix.drawPixel(5, 7, matrix.Color333(7,0,7));  
-      matrix.drawPixel(4, 7, matrix.Color333(7,0,7)); 
-      matrix.drawPixel(3, 7, matrix.Color333(7,0,7)); 
-      //A
-      //matrix.drawPixel(6, 8, matrix.Color333(7,0,7)); 
+  //      //M
+  matrix.drawPixel(28, 4, matrix.Color333(9,9,9));
+  matrix.drawPixel(28, 5, matrix.Color333(9,9,9));
+  matrix.drawPixel(28, 6, matrix.Color333(9,9,9));
+  matrix.drawPixel(28, 7, matrix.Color333(9,9,9));
+  matrix.drawPixel(29, 5, matrix.Color333(9,9,9));
+  matrix.drawPixel(30, 5, matrix.Color333(9,9,9));
+  matrix.drawPixel(31, 4, matrix.Color333(9,9,9));
+  matrix.drawPixel(31, 5, matrix.Color333(9,9,9));
+  matrix.drawPixel(31, 6, matrix.Color333(9,9,9));
+  matrix.drawPixel(31, 7, matrix.Color333(9,9,9));
+
+  //P
+  matrix.drawPixel(24, 4, matrix.Color333(9,9,9));
+  matrix.drawPixel(24, 5, matrix.Color333(9,9,9));
+  matrix.drawPixel(24, 6, matrix.Color333(9,9,9));
+  matrix.drawPixel(24, 7, matrix.Color333(9,9,9));
+  matrix.drawPixel(25, 4, matrix.Color333(9,9,9));
+  matrix.drawPixel(26, 4, matrix.Color333(9,9,9));
+  matrix.drawPixel(26, 5, matrix.Color333(9,9,9));
+  matrix.drawPixel(26, 6, matrix.Color333(9,9,9));
+  matrix.drawPixel(25, 6, matrix.Color333(9,9,9));
+  //A
+  //matrix.drawPixel(6, 8, matrix.Color333(9,9,9));
+  // Drawing double column sign
+
+
+
 }
 
 void am() {
-      //M
-      pm();
-      //A
-      matrix.drawPixel(5, 8, matrix.Color333(7,0,7)); 
+  //M
+  pm();
+  //A
+  matrix.drawPixel(26, 7, matrix.Color333(9,9,9));
 }
 
-void drawSun(){
-       //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
-  matrix.setCursor(1, 9);   // next line
-  matrix.setTextColor(matrix.Color333(0,7,7)); 
-  matrix.print('*');
-  matrix.setTextColor(matrix.Color333(0,4,7)); 
-  matrix.print('R');
-  matrix.setTextColor(matrix.Color333(0,0,7));
-  matrix.print('G');
-  matrix.setTextColor(matrix.Color333(4,0,7)); 
-  matrix.print("B");
-  matrix.setTextColor(matrix.Color333(7,0,4)); 
-  matrix.print("*");
-  
-  }
+void drawSun() {
+  //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
+  matrix.fillCircle(5, 11, 2, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(5, 7, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(2, 8, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(8, 8, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(1, 11, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(9, 11, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(2, 14, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(8, 14, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(5, 15, matrix.Color333(7, 4, 0));
+}
 
 void drawClock() {
-  matrix.swapBuffers(false);
-  matrix.fillScreen(matrix.Color333(0, 0, 0));
-  matrix.setCursor(13, 2);   // start at top left, with one pixel of spacing
-  matrix.setTextColor(matrix.Color333(0,7,0));
-  Serial.println(hour());
+  matrix.setCursor(0, 1);   // start at top left, with one pixel of spacing
+  matrix.setTextColor(matrix.Color333(9,9,9));
+  int temp;
   if (hour() == 12) {
     matrix.print("12");
     pm();
+    temp = 12;
   } else if (hour() == 0) {
     matrix.print("12");
+    temp = 12;
     am();
   } else if (hour() < 12) {
-    matrix.setCursor(15, 2);
     am();
     matrix.print(hour());
+    temp = hour();
   } else {
-    matrix.setCursor(13, 2);
     matrix.print(hour() % 12);
+    temp = hour() % 12;
     pm();
   }
-    matrix.print(":");
-    if (minute() <10) {
+  //  matrix.print(":");
+  if (minute() < 10) {
     matrix.print("0");
     matrix.print(minute());
-        } else {
+  } else {
     matrix.print(minute());
-    }
-    matrix.print(":");
-    if (second() <10) {
-    matrix.print("0");
-    matrix.print(second());
-        } else {
-    matrix.print(second());
-    }
-}
+  }
+
+  if (on) {
+    if (temp >= 10) {
+       matrix.drawPixel(11, 3, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(11, 6, matrix.Color333(9, 9, 9));
+    } else {
+       matrix.drawPixel(6, 3, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(6, 6, matrix.Color333(9, 9, 9));
+    } 
+  }
+  on = !on;
+ }
 
 void setup() {
 
   Serial.begin(115200);
- // initialize serial for ESP module
+  // initialize serial for ESP module
   Serial2.begin(9600);
   // initialize ESP module
   WiFi.init(&Serial2);
-  
+
   WiFi.begin(ssid, password);
- 
+
   // attempt to connect to WiFi network
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to WPA SSID: ");
@@ -174,24 +176,26 @@ void setup() {
     status = WiFi.begin(ssid, password);
   }
   Serial.println("Connected to the WiFi network");
-  
+
   Udp.begin(localPort);
   Serial.println("waiting for sync");
   setSyncProvider(getNtpTime);
-  
+
   matrix.begin();
   matrix.setTextWrap(false); // Allow text to run off right edge
   matrix.setTextSize(1);
 }
 
- 
+
 void loop() {
 
   if (!client.connected()) {
     reconnect();
   }
+  matrix.fillScreen(matrix.Color333(0, 0, 0));
   drawClock();
   drawSun();
+  matrix.swapBuffers(false);
   delay(100);
   client.loop();
 
@@ -244,7 +248,7 @@ void sendNTPpacket(IPAddress &address)
   packetBuffer[14]  = 49;
   packetBuffer[15]  = 52;
   // all NTP fields have been given values, now
-  // you can send a packet requesting a timestamp:                 
+  // you can send a packet requesting a timestamp:
   Udp.beginPacket(address, 123); //NTP requests are to port 123
   Udp.write(packetBuffer, NTP_PACKET_SIZE);
   Udp.endPacket();
