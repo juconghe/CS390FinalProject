@@ -19,12 +19,16 @@
 #define B   A1
 #define C   A2
 
-const char* ssid = "AHHA Lab Wifi";
-const char* password =  "ramanujan";
+#define HOME "0"
+#define TEMP "1"
+#define CAL "2"
+
+const char* ssid = "CS390N";
+const char* password =  "internetofthings";
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
 bool on = true;
-String mode = "0";
+String mode = "";
 
 const char str[] PROGMEM = "Go to stop&shop buy some juice";
 int    textX   = matrix.width(),
@@ -40,14 +44,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(mode);
 }
 
-WiFiEspClient espClient;
+WiFiEspClient espClient; 
 PubSubClient client("io.adafruit.com", 1883, callback, espClient);
 
 void reconnect() {
   while (!client.connected()) {
     Serial.println(F("Connecting to MQTT..."));
     if (client.connect("MEGA", ADAFRUIT_USERNAME, AIO_KEY )) {
-      client.subscribe(SLIDER_PATH, 1);
+      client.subscribe(PUB_FEED_PATH, 1);
       Serial.println(F("Connected"));
     } else {
       Serial.print(F("failed with state "));
@@ -210,7 +214,7 @@ void scrollText() {
   matrix.setTextColor(matrix.Color333(0, 4, 0));
   matrix.setCursor(textX, 8);
   matrix.print(F2(str));
-  if((--textX) < textMin) textX = matrix.width();
+  if((textX -= 4) < textMin) textX = matrix.width();
 
 }
 void setup() {
@@ -252,9 +256,16 @@ void loop() {
   if (!client.connected()) {
     reconnect();
   }
-  matrix.fillScreen(matrix.Color333(0, 0, 0));
-  drawClock();
-  drawRain();
+  matrix.fillScreen(0);
+  if (mode == HOME) {
+    drawClock();
+    drawCloud();
+  } else if (mode == TEMP) {
+    drawClock();
+    drawRain();
+  } else {
+    scrollText();
+  }
   //scrollText();
   matrix.swapBuffers(false);
   delay(100);
