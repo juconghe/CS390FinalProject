@@ -19,8 +19,8 @@
 #define B   A1
 #define C   A2
 
-const char* ssid = "weihai";
-const char* password =  "weihaihenshuai";
+const char* ssid = "AHHA Lab Wifi";
+const char* password =  "ramanujan";
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
 bool on = true;
@@ -108,6 +108,60 @@ void drawSun() {
   matrix.drawPixel(8, 14, matrix.Color333(7, 4, 0));
   matrix.drawPixel(5, 15, matrix.Color333(7, 4, 0));
 }
+
+
+void drawCloud() {
+  //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
+  matrix.drawPixel(6, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(7, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 9, matrix.Color333(0,4,7));
+  matrix.drawPixel(9, 9, matrix.Color333(0,4,7));
+  matrix.drawPixel(3, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(4, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(2, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(11, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(2, 12, matrix.Color333(0,4,7));
+  matrix.drawPixel(6, 12, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
+  matrix.drawLine(10, 12, 12, 12, matrix.Color333(0,4,7));
+  matrix.drawLine(1, 13, 1, 14, matrix.Color333(0,4,7));
+  matrix.drawLine(13, 13, 13, 14, matrix.Color333(0,4,7));
+  matrix.drawLine(2, 15, 12, 15, matrix.Color333(0,4,7));
+}
+
+
+void drawRain() {
+  //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
+  matrix.drawLine(4, 8, 6, 8, matrix.Color333(0,4,7));
+  matrix.drawLine(3, 9, 7, 9, matrix.Color333(0,4,7));
+  matrix.drawPixel(2, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(4, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(6, 10, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 10, matrix.Color333(0,4,7));
+  matrix.drawLine(1, 11, 9, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(2, 12, matrix.Color333(0,4,7));
+  matrix.drawPixel(4, 12, matrix.Color333(0,4,7));
+  matrix.drawPixel(6, 12, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 12, matrix.Color333(0,4,7));
+  matrix.drawPixel(3, 13, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 13, matrix.Color333(0,4,7));
+  matrix.drawPixel(7, 13, matrix.Color333(0,4,7));
+  matrix.drawPixel(3, 15, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 15, matrix.Color333(0,4,7));
+  matrix.drawPixel(7, 15, matrix.Color333(0,4,7));
+  
+}
+
+
 
 void drawClock() {
   matrix.setCursor(0, 1);   // start at top left, with one pixel of spacing
@@ -200,8 +254,8 @@ void loop() {
   }
   matrix.fillScreen(matrix.Color333(0, 0, 0));
   drawClock();
-//  drawSun();
-  scrollText();
+  drawRain();
+  //scrollText();
   matrix.swapBuffers(false);
   delay(100);
   client.loop();
