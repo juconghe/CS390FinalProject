@@ -12,7 +12,6 @@
 #define AIO_KEY  "01a85723468e409bb15488a77efe724c"
 #define SLIDER_PATH ADAFRUIT_USERNAME "/feeds/slider"
 #define PUB_FEED_PATH ADAFRUIT_USERNAME "/feeds/publish"
-#define F2(progmem_ptr) (const __FlashStringHelper *)progmem_ptr
 
 #define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega)
 #define LAT A3
@@ -22,18 +21,20 @@
 #define C   A2
 
 #define HOME "0"
-#define TEMP "1"
-#define CAL "2"
+#define SUNNY "1"
+#define RAIN "2"
+#define CLOUD "3"
+#define CAL "4"
 
-const char* ssid = "surface";
-const char* password =  "umass123456";
+
+const char* ssid = "CS390N";
+const char* password =  "internetofthings";
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
 bool on = true;
-String mode = "";
-//const char str[] PROGMEM = "Go to stop&shop buy some juice";
-//int    textX   = matrix.width(),
-//       textMin = sizeof(str) * -6;
+String mode = HOME;
+int    textX   = matrix.width(),
+       textMin;
 
 
 
@@ -210,80 +211,46 @@ void drawClock() {
   on = !on;
 }
 
-//void scrollText() {
-//  matrix.setTextSize(1);
-//  matrix.setTextWrap(false); // Allow text to run off right edge
-//  matrix.setTextColor(matrix.Color333(9, 9, 9));
-//  matrix.setCursor(textX, 8);
-//  matrix.print(F2(str));
-//  if((textX -= 4) < textMin) textX = matrix.width();
-//}
-
-void drawCalendar(){
-  char json[] = "{\"CS390N\":[\"11:30AM\",\"2:30PM\"],\"CS585\":[\"3:30PM\",\"5:30PM\"]}";
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(json);
-  for (auto kv : root) {
-    //GET Key: 
-    String str_key = kv.key;
-    // GET Value: copy value of each element to char array from char pointer
-    String str_first = kv.value[0].as<String>();
-    String str_second = kv.value[1].as<String>();
-    String final_string = str_key + " " + str_first + " : " + str_second; 
-
-    // Converting String to array of char 
-    int n = final_string.length();     
-    // declaring character array
-    char final_char_array[n+1]; 
-    // copying the contents of the 
-    // string to char array
-    strcpy(final_char_array, final_string.c_str()); 
-
-    //Drawing on the panel
-    int    textX   = matrix.width(),
-       textMin = sizeof(final_char_array) * -6;       
-    matrix.setTextSize(1);
-    matrix.setTextWrap(false); // Allow text to run off right edge
-    matrix.setTextColor(matrix.Color333(9, 9, 9));
-    matrix.setCursor(textX, 8);
-    matrix.print(F2(final_char_array));
-    if((textX -= 4) < textMin) textX = matrix.width();
-    //scrollText(final_char_array); 
-    Serial.println(final_char_array);
-    }
+void scrollText() {
+  matrix.setTextSize(2);
+  matrix.setTextWrap(false); // Allow text to run off right edge
+  matrix.setTextColor(matrix.Color333(1,0,0));
+  matrix.setCursor(textX, 1);
+  matrix.print("CS390N 11:30AM - 2:30PM  CS585 3:30PM - 5:30PM");
+  textMin = sizeof("CS390N 11:30AM-2:30PM  CS585 3:30PM-5:30PM") * -6;
+  if((textX -= 4) < textMin) textX = matrix.width();
 }
-//  char* sensor = root["sensor"];
-//  char* start_time    = root["data"][0];
-//  char* end_time   = root["data"][1];
-  
+
+
 
 void setup() {
 
   Serial.begin(115200);
   // initialize serial for ESP module
   Serial2.begin(9600);
-//  // initialize ESP module
-//  WiFi.init(&Serial2);
-//  WiFi.begin(ssid, password);
-//
-//  // Attempt to connect to WiFi network
-//  while ( status != WL_CONNECTED) {
-//    Serial.print("Attempting to connect to WPA SSID: ");
-//    Serial.println(ssid);
-//    // Connect to WPA/WPA2 network
-//    status = WiFi.begin(ssid, password);
-//  }
-//  Serial.println(F("Connected to the WiFi network"));
+
+  // initialize ESP module
+  WiFi.init(&Serial2);
+  WiFi.begin(ssid, password);
+
+  // Attempt to connect to WiFi network
+  while ( status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to WPA SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network
+    status = WiFi.begin(ssid, password);
+  }
+  Serial.println(F("Connected to the WiFi network"));
   
-//  // Syncing Time 
-//  Udp.begin(localPort);
-//  time_t syncTime = getNtpTime();
-//  while (syncTime == 0) {
-//    Serial.println(F("Sycning time"));
-//    syncTime = getNtpTime();
-//    delay(1000);
-//  }
-//  setTime(syncTime);
+  // Syncing Time 
+  Udp.begin(localPort);
+  time_t syncTime = getNtpTime();
+  while (syncTime == 0) {
+    Serial.println(F("Sycning time"));
+    syncTime = getNtpTime();
+    delay(1000);
+  }
+  setTime(syncTime);
 
   // Start displaying RGB Panel
   matrix.begin();
@@ -294,28 +261,21 @@ void setup() {
 
 void loop() {
 
-//  if (!client.connected()) {
-//    reconnect();
-//  }
-//  matrix.fillScreen(0);
-//  if (mode == HOME) {
-//    drawClock();
-//    drawCloud();
-//  } else if (mode == TEMP) {
-//    drawClock();
-//    drawRain();
-//  } else {
-//    scrollText();
-//  }
+  if (!client.connected()) {
+    reconnect();
+  }
   matrix.fillScreen(0);
- // drawCalendar();
-  //drawCalendar();
-  //drawRain();
-  //scrollText();
-  drawCalendar();
-  //drawCalendar();
+  if (mode == HOME) {
+    drawClock();
+    drawTemp();
+    drawWeather();
+  } else if (mode == CAL){
+    scrollText();
+  } else {
+    drawMusic();
+  }
   matrix.swapBuffers(false);
-  delay(100);
+  delay(200);
   client.loop();
 
 }
