@@ -10,8 +10,10 @@
 
 #define ADAFRUIT_USERNAME  "Jucong"
 #define AIO_KEY  "01a85723468e409bb15488a77efe724c"
-#define SLIDER_PATH ADAFRUIT_USERNAME "/feeds/slider"
+//#define TEMP_PATH ADAFRUIT_USERNAME "/feeds/temp"
 #define PUB_FEED_PATH ADAFRUIT_USERNAME "/feeds/publish"
+//#define CAL_PATH ADAFRUIT_USERNAME "/feeds/calendar"
+//#define MUSIC_PATH ADAFRUIT_USERNAME "feeds/music"
 
 #define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega)
 #define LAT A3
@@ -21,32 +23,54 @@
 #define C   A2
 
 #define HOME "0"
-#define SUNNY "1"
-#define RAIN "2"
-#define CLOUD "3"
+#define SUNNY 1
+#define RAIN 2
+#define CLOUD 3
 #define CAL "4"
+#define MUSIC "5"
+#define TEMP "6"
+#define WEATHER "7"
 
-
-const char* ssid = "CS390N";
-const char* password =  "internetofthings";
+int WEATHER_MODE = SUNNY;
+const char* ssid = "AHHA Lab Wifi";
+const char* password =  "ramanujan";
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, true);
 bool on = true;
 String mode = HOME;
 int    textX   = matrix.width(),
        textMin;
-
-
+String temperature = "0";
 
 void callback(char* topic, byte* payload, unsigned int length) {
   char s[length + 1];
   for (int i = 0; i < length; i++) {
-    s[i] = (char)payload[i];
+    s[i] = (char) payload[i];
   }
   s[length] = '\0';
-  mode = String(s);
-  Serial.println(mode);
-}
+
+  Serial.println("=====");
+  String temp = String(s);
+  String first_letter = String(temp[0]);
+  String content = temp.substring(1);
+  Serial.println(s);
+    if (first_letter.equals(HOME)) {
+       mode = HOME;
+    } else if (first_letter.equals(CAL)) {
+      mode = CAL;
+      //schedule = String(s);
+    } else if (first_letter.equals(TEMP)) {
+      mode = TEMP;
+      temperature = content;
+    }else if (first_letter.equals(WEATHER)){
+      mode = TEMP;
+      WEATHER_MODE = content.toInt();
+    } else if (first_letter.equals(MUSIC)) {
+      mode = MUSIC;
+    }
+ }
+
+
 
 WiFiEspClient espClient; 
 PubSubClient client("io.adafruit.com", 1883, callback, espClient);
@@ -105,73 +129,73 @@ void am() {
 
 void drawSun() {
   //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
-  matrix.fillCircle(5, 11, 2, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(5, 7, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(2, 8, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(8, 8, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(1, 11, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(9, 11, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(2, 14, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(8, 14, matrix.Color333(7, 4, 0));
-  matrix.drawPixel(5, 15, matrix.Color333(7, 4, 0));
+  matrix.fillCircle(8, 7, 2, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(8, 3, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(5, 5, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(11, 5, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(4, 7, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(12, 7, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(5, 10, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(11, 10, matrix.Color333(7, 4, 0));
+  matrix.drawPixel(8, 11, matrix.Color333(7, 4, 0));
 }
 
 
 void drawCloud() {
   //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
-  matrix.drawPixel(6, 8, matrix.Color333(0,4,7));
-  matrix.drawPixel(7, 8, matrix.Color333(0,4,7));
-  matrix.drawPixel(8, 8, matrix.Color333(0,4,7));
-  matrix.drawPixel(5, 9, matrix.Color333(0,4,7));
-  matrix.drawPixel(9, 9, matrix.Color333(0,4,7));
-  matrix.drawPixel(3, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(4, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(2, 11, matrix.Color333(0,4,7));
-  matrix.drawPixel(5, 11, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 11, matrix.Color333(0,4,7));
-  matrix.drawPixel(11, 11, matrix.Color333(0,4,7));
-  matrix.drawPixel(2, 12, matrix.Color333(0,4,7));
-  matrix.drawPixel(6, 12, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(10, 10, matrix.Color333(0,4,7));
-  matrix.drawLine(10, 12, 12, 12, matrix.Color333(0,4,7));
-  matrix.drawLine(1, 13, 1, 14, matrix.Color333(0,4,7));
-  matrix.drawLine(13, 13, 13, 14, matrix.Color333(0,4,7));
-  matrix.drawLine(2, 15, 12, 15, matrix.Color333(0,4,7));
+  matrix.drawPixel(9, 4, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 4, matrix.Color333(0,4,7));
+  matrix.drawPixel(11, 4, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 5, matrix.Color333(0,4,7));
+  matrix.drawPixel(12, 5, matrix.Color333(0,4,7));
+  matrix.drawPixel(6, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(7, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 7, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 7, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 7, matrix.Color333(0,4,7));
+  matrix.drawPixel(14, 7, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(9, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(13, 6, matrix.Color333(0,4,7));
+  matrix.drawLine(13, 8, 15, 8, matrix.Color333(0,4,7));
+  matrix.drawLine(4, 9, 4, 10, matrix.Color333(0,4,7));
+  matrix.drawLine(17, 9, 17, 10, matrix.Color333(0,4,7));
+  matrix.drawLine(5, 11, 15, 11, matrix.Color333(0,4,7));
 }
 
 
 void drawRain() {
   //matrix.drawCircle(7, 7, 7, matrix.Color333(0, 0, 7));
-  matrix.drawLine(4, 8, 6, 8, matrix.Color333(0,4,7));
-  matrix.drawLine(3, 9, 7, 9, matrix.Color333(0,4,7));
-  matrix.drawPixel(2, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(4, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(6, 10, matrix.Color333(0,4,7));
-  matrix.drawPixel(8, 10, matrix.Color333(0,4,7));
-  matrix.drawLine(1, 11, 9, 11, matrix.Color333(0,4,7));
-  matrix.drawPixel(2, 12, matrix.Color333(0,4,7));
-  matrix.drawPixel(4, 12, matrix.Color333(0,4,7));
-  matrix.drawPixel(6, 12, matrix.Color333(0,4,7));
-  matrix.drawPixel(8, 12, matrix.Color333(0,4,7));
-  matrix.drawPixel(3, 13, matrix.Color333(0,4,7));
-  matrix.drawPixel(5, 13, matrix.Color333(0,4,7));
-  matrix.drawPixel(7, 13, matrix.Color333(0,4,7));
-  matrix.drawPixel(3, 15, matrix.Color333(0,4,7));
-  matrix.drawPixel(5, 15, matrix.Color333(0,4,7));
-  matrix.drawPixel(7, 15, matrix.Color333(0,4,7));
+  matrix.drawLine(7, 4, 9, 4, matrix.Color333(0,4,7));
+  matrix.drawLine(6, 5, 10, 5, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(7, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(9, 6, matrix.Color333(0,4,7));
+  matrix.drawPixel(11, 6, matrix.Color333(0,4,7));
+  matrix.drawLine(4, 7, 12, 7, matrix.Color333(0,4,7));
+  matrix.drawPixel(5, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(7, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(9, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(11, 8, matrix.Color333(0,4,7));
+  matrix.drawPixel(6, 9, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 9, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 9, matrix.Color333(0,4,7));
+  matrix.drawPixel(6, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(8, 11, matrix.Color333(0,4,7));
+  matrix.drawPixel(10, 11, matrix.Color333(0,4,7));
   
 }
 
 
 
 void drawClock() {
-  matrix.setCursor(0, 1);   // start at top left, with one pixel of spacing
+  matrix.setCursor(0, 4);   // start at top left, with one pixel of spacing
   matrix.setTextColor(matrix.Color333(9,9,9));
   int temp;
   if (hour() == 12) {
@@ -201,28 +225,60 @@ void drawClock() {
 
   if (on) {
     if (temp >= 10) {
-       matrix.drawPixel(11, 3, matrix.Color333(9, 9, 9));
-       matrix.drawPixel(11, 6, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(11, 5, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(11, 8, matrix.Color333(9, 9, 9));
     } else {
-       matrix.drawPixel(5, 3, matrix.Color333(9, 9, 9));
-       matrix.drawPixel(5, 6, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(5, 5, matrix.Color333(9, 9, 9));
+       matrix.drawPixel(5, 8, matrix.Color333(9, 9, 9));
     }
   }
   on = !on;
 }
 
-void scrollText() {
+void drawCalendar() {
   matrix.setTextSize(2);
   matrix.setTextWrap(false); // Allow text to run off right edge
   matrix.setTextColor(matrix.Color333(1,0,0));
   matrix.setCursor(textX, 1);
-  matrix.print("CS390N 11:30AM - 2:30PM  CS585 3:30PM - 5:30PM");
-  textMin = sizeof("CS390N 11:30AM-2:30PM  CS585 3:30PM-5:30PM") * -6;
-  if((textX -= 4) < textMin) textX = matrix.width();
+  matrix.print("Toyota payment 9:00AM-10:00AM CS589 10:00AM-11:15AM CS514 11:30AM-12:45PM  CS373 2:30PM-3:45PM CS390N 4:00PM-5:15PM");
+  textMin = sizeof("Toyota payment 9:00AM-10:00AM CS589 10:00AM-11:15AM CS514 11:30AM-12:45PM  CS373 2:30PM-3:45PM CS390N 4:00PM-5:15PM") * -6;
+  if((textX -= 6) < textMin) textX = matrix.width();
 }
 
+void drawTemp(){
+     if(temperature.length() == 1){
+        matrix.setCursor(20, 5);
+      }else{
+        matrix.setCursor(16, 5);
+        }
+     
+     matrix.print(temperature);
+     matrix.drawLine(28, 8, 31, 8, matrix.Color333(9,9,9));
+     matrix.drawLine(28, 11, 31, 11, matrix.Color333(9,9,9));
+     matrix.drawLine(28, 9, 28, 10, matrix.Color333(9,9,9));
+};
 
+void drawMusic(){
+    matrix.drawLine(21, 9, 28, 9, matrix.Color333(0,4,0));
+    matrix.drawLine(21, 10, 21, 14, matrix.Color333(0,4,0));
+    matrix.drawLine(28, 10, 28, 14, matrix.Color333(0,4,0));
+    matrix.drawLine(19, 15, 21, 15, matrix.Color333(0,4,0));
+    matrix.drawLine(26, 15, 28, 15, matrix.Color333(0,4,0));
 
+  }
+
+void drawWeather(){
+  
+  if(WEATHER_MODE == RAIN){
+      drawRain();
+    }else if (WEATHER_MODE == CLOUD){
+      drawCloud();
+    }else{
+      drawSun();
+    }
+}
+
+  
 void setup() {
 
   Serial.begin(115200);
@@ -259,6 +315,12 @@ void setup() {
 }
 
 
+
+
+
+
+
+
 void loop() {
 
   if (!client.connected()) {
@@ -266,12 +328,22 @@ void loop() {
   }
   matrix.fillScreen(0);
   if (mode == HOME) {
+    matrix.setTextSize(1);
+     textX   = matrix.width(),
     drawClock();
+   // drawTemp();
+   // drawWeather();
+  } else if (mode == CAL){
+    drawCalendar();
+  } else if (mode == TEMP){
+    matrix.setTextSize(1);
+     textX   = matrix.width(),
     drawTemp();
     drawWeather();
-  } else if (mode == CAL){
-    scrollText();
-  } else {
+  } else if (mode == MUSIC) {
+    matrix.setTextSize(1);
+    textX   = matrix.width(),
+    drawClock();
     drawMusic();
   }
   matrix.swapBuffers(false);
